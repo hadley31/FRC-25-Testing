@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.auto.AutoRoutines;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drive;
@@ -44,8 +45,6 @@ public class Robot extends TimedRobot {
     autoChooser = new AutoChooser(factory, "Choose Auto");
 
     autoChooser.addAutoRoutine("Test Auto", routines::testAuto);
-
-    // m_drive.setDefaultCommand(m_drive.robotCentricDriveCommand(() -> new ChassisSpeeds(0.5, 0, 0)));
   }
 
   @Override
@@ -77,7 +76,10 @@ public class Robot extends TimedRobot {
   }
 
   private Map<String, Command> getCommandBindings() {
-    return Map.of();
+    return Map.of(
+        "PrintHi", Commands.print("Hi!"),
+        "PrintHello", Commands.print("Hello!"),
+        "PrintEnd", Commands.print("End!"));
   }
 
   public boolean isBlueAlliance() {

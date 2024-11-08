@@ -8,29 +8,29 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.subsystems.Drive;
 
 public class AutoRoutines {
-    private final Drive m_drive;
+  private final Drive m_drive;
 
-    public AutoRoutines(Drive drive) {
-        m_drive = drive;
-    }
+  public AutoRoutines(Drive drive) {
+    m_drive = drive;
+  }
 
-    public Command testAuto(AutoFactory factory) {
-        final AutoLoop routine = factory.newLoop("Test Auto");
-        final AutoTrajectory testPath = factory.trajectory("TestPath", routine);
+  public Command testAuto(AutoFactory factory) {
+    final AutoLoop routine = factory.newLoop("Test Auto");
+    final AutoTrajectory testPath = factory.trajectory("TestPath", routine);
 
-        routine.enabled().onTrue(
-            Commands.print("STARTING")
+    routine.enabled().onTrue(
+        Commands.print("Starting Test Auto")
             .andThen(resetPoseCommand(routine, testPath))
-            .andThen(Commands.print("AHHHHHHH"))
             .andThen(testPath.cmd())
-            .andThen(Commands.print("DONE")));
+            .andThen(m_drive.stopCommand())
+            .andThen(Commands.print("Finished Test Auto")));
 
-        return routine.cmd();
-    }
+    return routine.cmd();
+  }
 
-    private Command resetPoseCommand(AutoLoop loop, AutoTrajectory path) {
-        return m_drive.runOnce(() -> path.getInitialPose().ifPresentOrElse(
-                pose -> m_drive.resetPose(pose),
-                loop::kill));
-    }
+  private Command resetPoseCommand(AutoLoop loop, AutoTrajectory path) {
+    return m_drive.runOnce(() -> path.getInitialPose().ifPresentOrElse(
+        pose -> m_drive.resetPose(pose),
+        loop::kill));
+  }
 }
