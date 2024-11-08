@@ -11,6 +11,7 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -20,20 +21,51 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.commands.auto.AutoRoutines;
 import frc.robot.generated.TunerConstants;
+import frc.robot.oi.DriverControls;
+import frc.robot.oi.SingleUserXboxControls;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
 
-@Logged
+@Logged(strategy = Strategy.OPT_IN)
 public class Robot extends TimedRobot {
+  @Logged
   private Drive m_drive;
   private AutoChooser autoChooser;
   private Command m_autonomousCommand;
 
+  private DriverControls m_driverControls;
+
   public Robot() {
+    configureLogging();
+    configureSubsystems();
+    configureBindings();
+    configureAutos();
+  }
+
+  private void configureLogging() {
     DataLogManager.start();
     Epilogue.bind(this);
+  }
 
+  private void configureSubsystems() {
     m_drive = new Drive(TunerConstants.createDrivetrain());
+  }
+
+  private void configureBindings() {
+    var singleUserControls = new SingleUserXboxControls(0);
+    m_driverControls = singleUserControls;
+
+    Command fieldRelativeDriveCommand = m_drive.fieldRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
+    Command robotRelativeDriveCommand = m_drive.robotRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
+    Command seedFieldRelativeCommand = m_drive.seedFieldRelativeCommand();
+
+    m_drive.setDefaultCommand(fieldRelativeDriveCommand);
+
+    m_driverControls.robotRelativeDrive().whileTrue(robotRelativeDriveCommand);
+    m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
+  }
+
+  private void configureAutos() {
     var pathController = new ChoreoPathController(m_drive::setControl);
     var factory = Choreo.createAutoFactory(m_drive, m_drive::getPose, pathController::followPath, this::isBlueAlliance,
         new AutoBindings());
