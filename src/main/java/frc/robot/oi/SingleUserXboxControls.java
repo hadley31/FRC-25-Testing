@@ -36,6 +36,11 @@ public class SingleUserXboxControls implements DriverControls {
 
   @Override
   public Trigger robotRelativeDrive() {
+    return m_controller.leftBumper();
+  }
+
+  @Override
+  public Trigger faceSpeakerDrive() {
     return m_controller.rightBumper();
   }
 

@@ -11,7 +11,6 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -26,7 +25,7 @@ import frc.robot.oi.SingleUserXboxControls;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
 
-@Logged(strategy = Strategy.OPT_IN)
+@Logged
 public class Robot extends TimedRobot {
   @Logged
   private Drive m_drive;
@@ -57,11 +56,14 @@ public class Robot extends TimedRobot {
 
     Command fieldRelativeDriveCommand = m_drive.fieldRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
     Command robotRelativeDriveCommand = m_drive.robotRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
+    Command pointAtSpeakerDriveCommand = m_drive.pointAtTargetDriveCommand(m_driverControls::driveForwardVelocity,
+        m_driverControls::driveLeftVelocity, FieldConstants.Speaker.centerSpeakerOpening.toTranslation2d());
     Command seedFieldRelativeCommand = m_drive.seedFieldRelativeCommand();
 
     m_drive.setDefaultCommand(fieldRelativeDriveCommand);
 
     m_driverControls.robotRelativeDrive().whileTrue(robotRelativeDriveCommand);
+    m_driverControls.faceSpeakerDrive().whileTrue(pointAtSpeakerDriveCommand);
     m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
   }
 

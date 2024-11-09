@@ -7,24 +7,29 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import edu.wpi.first.epilogue.Logged;
-import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-@Logged(strategy = Strategy.OPT_IN)
+@Logged
 public class Drive extends SubsystemBase {
   private static final double kSimLoopPeriod = 0.005; // 5 ms
   private Notifier m_simNotifier = null;
@@ -33,12 +38,21 @@ public class Drive extends SubsystemBase {
   private final SwerveDrivetrain m_swerve;
   private SwerveDriveState m_currentState = new SwerveDriveState();
 
+  private final TrapezoidProfile m_trapezoidProfile = new TrapezoidProfile(
+      new Constraints(
+          Units.RotationsPerSecond.of(3),
+          Units.RotationsPerSecondPerSecond.of(2)));
+
   private final SwerveRequest.ApplyFieldSpeeds m_fieldRelativeRequest = new SwerveRequest.ApplyFieldSpeeds();
   private final SwerveRequest.ApplyRobotSpeeds m_robotRelativeRequest = new SwerveRequest.ApplyRobotSpeeds();
+  private final SwerveRequest.FieldCentricFacingAngle m_fieldRelativeFacingRequest = new FieldCentricFacingAngle();
 
   public Drive(SwerveDrivetrain swerve) {
     m_swerve = swerve;
     m_swerve.registerTelemetry(state -> m_currentState = state.clone());
+
+    m_fieldRelativeFacingRequest.HeadingController.setPID(7, 0, 0);
+    m_fieldRelativeFacingRequest.HeadingController.setTolerance(0.03);
 
     if (Utils.isSimulation()) {
       startSimThread();
@@ -69,6 +83,18 @@ public class Drive extends SubsystemBase {
         ? SwerveModule.DriveRequestType.OpenLoopVoltage
         : SwerveModule.DriveRequestType.Velocity;
     m_swerve.setControl(m_robotRelativeRequest.withSpeeds(speeds).withDriveRequestType(driveRequestType));
+  }
+
+  public void driveRobotPointAtTarget(LinearVelocity xVelocity, LinearVelocity yVelocity, Translation2d target) {
+    Rotation2d targetRotation = target.minus(getPose().getTranslation()).getAngle();
+
+    m_swerve.setControl(m_fieldRelativeFacingRequest
+        .withVelocityX(xVelocity)
+        .withVelocityY(yVelocity)
+        .withTargetDirection(targetRotation)
+        .withTargetRateFeedforward(
+            Units.RadiansPerSecond.of(m_fieldRelativeFacingRequest.HeadingController.getLastAppliedOutput() / 3))
+        .withRotationalDeadband(Units.DegreesPerSecond.of(1)));
   }
 
   @Logged
@@ -120,6 +146,11 @@ public class Drive extends SubsystemBase {
 
   public Command fieldRelativeDriveCommand(Supplier<ChassisSpeeds> robotRelativeSpeeds) {
     return run(() -> driveFieldRelative(robotRelativeSpeeds.get()));
+  }
+
+  public Command pointAtTargetDriveCommand(Supplier<LinearVelocity> xVelocity, Supplier<LinearVelocity> yVelocity,
+      Translation2d target) {
+    return run(() -> driveRobotPointAtTarget(xVelocity.get(), yVelocity.get(), target));
   }
 
   public Command resetPoseCommand(Pose2d pose) {

@@ -19,6 +19,8 @@ public interface DriverControls {
 
   public Trigger robotRelativeDrive();
 
+  public Trigger faceSpeakerDrive();
+
   public Trigger seedFieldRelative();
 
   public default LinearVelocity driveForwardVelocity() {
