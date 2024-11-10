@@ -1,6 +1,10 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Second;
+
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
@@ -19,9 +23,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -38,11 +41,6 @@ public class Drive extends SubsystemBase {
   private final SwerveDrivetrain m_swerve;
   private SwerveDriveState m_currentState = new SwerveDriveState();
 
-  private final TrapezoidProfile m_trapezoidProfile = new TrapezoidProfile(
-      new Constraints(
-          Units.RotationsPerSecond.of(3),
-          Units.RotationsPerSecondPerSecond.of(2)));
-
   private final SwerveRequest.ApplyFieldSpeeds m_fieldRelativeRequest = new SwerveRequest.ApplyFieldSpeeds();
   private final SwerveRequest.ApplyRobotSpeeds m_robotRelativeRequest = new SwerveRequest.ApplyRobotSpeeds();
   private final SwerveRequest.FieldCentricFacingAngle m_fieldRelativeFacingRequest = new FieldCentricFacingAngle();
@@ -51,7 +49,7 @@ public class Drive extends SubsystemBase {
     m_swerve = swerve;
     m_swerve.registerTelemetry(state -> m_currentState = state.clone());
 
-    m_fieldRelativeFacingRequest.HeadingController.setPID(7, 0, 0);
+    m_fieldRelativeFacingRequest.HeadingController.setPID(9, 0, 0);
     m_fieldRelativeFacingRequest.HeadingController.setTolerance(0.03);
 
     if (Utils.isSimulation()) {
@@ -87,13 +85,13 @@ public class Drive extends SubsystemBase {
 
   public void driveRobotPointAtTarget(LinearVelocity xVelocity, LinearVelocity yVelocity, Translation2d target) {
     Rotation2d targetRotation = target.minus(getPose().getTranslation()).getAngle();
+    AngularVelocity feedForward = Radians.of(targetRotation.minus(getRotation()).getRadians()).per(Second);
 
     m_swerve.setControl(m_fieldRelativeFacingRequest
         .withVelocityX(xVelocity)
         .withVelocityY(yVelocity)
         .withTargetDirection(targetRotation)
-        .withTargetRateFeedforward(
-            Units.RadiansPerSecond.of(m_fieldRelativeFacingRequest.HeadingController.getLastAppliedOutput() / 3))
+        .withTargetRateFeedforward(feedForward)
         .withRotationalDeadband(Units.DegreesPerSecond.of(1)));
   }
 
@@ -109,6 +107,11 @@ public class Drive extends SubsystemBase {
   @Logged
   public SwerveModuleState[] getModuleStates() {
     return m_currentState.ModuleStates;
+  }
+
+  @Logged
+  public SwerveModuleState[] getDesiredModuleStates() {
+    return Stream.of(m_swerve.getModules()).map(SwerveModule::getTargetState).toArray(SwerveModuleState[]::new);
   }
 
   @Logged

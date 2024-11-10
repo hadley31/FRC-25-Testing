@@ -18,12 +18,16 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.auto.AutoRoutines;
 import frc.robot.generated.TunerConstants;
 import frc.robot.oi.DriverControls;
-import frc.robot.oi.SingleUserXboxControls;
+import frc.robot.oi.InputControlsFactory;
+import frc.robot.oi.OperatorControls;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
+import frc.robot.util.DriveSysIdRoutineFactory;
+import frc.robot.util.DriveSysIdRoutineFactory.DriveSysIdRoutineType;
 
 @Logged
 public class Robot extends TimedRobot {
@@ -33,6 +37,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private DriverControls m_driverControls;
+  private OperatorControls m_operatorControls;
 
   public Robot() {
     configureLogging();
@@ -51,8 +56,9 @@ public class Robot extends TimedRobot {
   }
 
   private void configureBindings() {
-    var singleUserControls = new SingleUserXboxControls(0);
-    m_driverControls = singleUserControls;
+    InputControlsFactory controlsFactory = InputControlsFactory.determineInputs();
+    m_driverControls = controlsFactory.getDriverControls();
+    m_operatorControls = controlsFactory.getOperatorControls();
 
     Command fieldRelativeDriveCommand = m_drive.fieldRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
     Command robotRelativeDriveCommand = m_drive.robotRelativeDriveCommand(m_driverControls::getTargetChassisSpeeds);
@@ -65,6 +71,13 @@ public class Robot extends TimedRobot {
     m_driverControls.robotRelativeDrive().whileTrue(robotRelativeDriveCommand);
     m_driverControls.faceSpeakerDrive().whileTrue(pointAtSpeakerDriveCommand);
     m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
+
+    DriveSysIdRoutineFactory sysIdRoutineFactory = new DriveSysIdRoutineFactory(m_drive,
+        DriveSysIdRoutineType.kTranslation);
+    m_operatorControls.quasistaticForward().whileTrue(sysIdRoutineFactory.sysIdQuasistatic(Direction.kForward));
+    m_operatorControls.quasistaticReverse().whileTrue(sysIdRoutineFactory.sysIdQuasistatic(Direction.kReverse));
+    m_operatorControls.dynamicForward().whileTrue(sysIdRoutineFactory.sysIdDynamic(Direction.kForward));
+    m_operatorControls.dynamicReverse().whileTrue(sysIdRoutineFactory.sysIdDynamic(Direction.kReverse));
   }
 
   private void configureAutos() {
@@ -101,7 +114,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousInit() {
-
     m_autonomousCommand = autoChooser.getSelectedAutoRoutine();
 
     if (m_autonomousCommand != null) {
