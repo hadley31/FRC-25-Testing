@@ -4,10 +4,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class SingleUserXboxControls implements DriverControls, OperatorControls {
+public class DriverXboxControls implements DriverControls {
   private final CommandXboxController m_controller;
 
-  public SingleUserXboxControls(int port) {
+  public DriverXboxControls(int port) {
     m_controller = new CommandXboxController(port);
   }
 
@@ -49,25 +49,5 @@ public class SingleUserXboxControls implements DriverControls, OperatorControls 
   @Override
   public Trigger seedFieldRelative() {
     return m_controller.y();
-  }
-
-  @Override
-  public Trigger quasistaticForward() {
-    return m_controller.back().and(m_controller.povUp());
-  }
-
-  @Override
-  public Trigger quasistaticReverse() {
-    return m_controller.back().and(m_controller.povDown());
-  }
-
-  @Override
-  public Trigger dynamicForward() {
-    return m_controller.start().and(m_controller.povUp());
-  }
-
-  @Override
-  public Trigger dynamicReverse() {
-    return m_controller.start().and(m_controller.povDown());
   }
 }
