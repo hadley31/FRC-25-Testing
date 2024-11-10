@@ -11,6 +11,7 @@ import choreo.auto.AutoChooser;
 import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.epilogue.Logged.Strategy;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -29,7 +30,7 @@ import frc.robot.util.ChoreoPathController;
 import frc.robot.util.DriveSysIdRoutineFactory;
 import frc.robot.util.DriveSysIdRoutineFactory.DriveSysIdRoutineType;
 
-@Logged
+@Logged(strategy = Strategy.OPT_IN)
 public class Robot extends TimedRobot {
   @Logged
   private Drive m_drive;
