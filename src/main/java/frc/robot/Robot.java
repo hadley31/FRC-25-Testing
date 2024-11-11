@@ -12,6 +12,7 @@ import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Strategy;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -25,6 +26,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.oi.DriverControls;
 import frc.robot.oi.InputControlsFactory;
 import frc.robot.oi.OperatorControls;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
 import frc.robot.util.DriveSysIdRoutineFactory;
@@ -34,6 +36,8 @@ import frc.robot.util.DriveSysIdRoutineFactory.DriveSysIdRoutineType;
 public class Robot extends TimedRobot {
   @Logged
   private Drive m_drive;
+  @Logged
+  private Arm m_arm;
   private AutoChooser autoChooser;
   private Command m_autonomousCommand;
 
@@ -54,6 +58,7 @@ public class Robot extends TimedRobot {
 
   private void configureSubsystems() {
     m_drive = new Drive(TunerConstants.createDrivetrain());
+    m_arm = new Arm(17, 18);
   }
 
   private void configureBindings() {
@@ -72,6 +77,10 @@ public class Robot extends TimedRobot {
     m_driverControls.robotRelativeDrive().whileTrue(robotRelativeDriveCommand);
     m_driverControls.faceSpeakerDrive().whileTrue(pointAtSpeakerDriveCommand);
     m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
+
+    m_operatorControls.stow().onTrue(m_arm.setTargetAngleCommand(Rotation2d.kZero));
+    m_operatorControls.scoreArm45Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)));
+    m_operatorControls.scoreArm75Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
 
     DriveSysIdRoutineFactory sysIdRoutineFactory = new DriveSysIdRoutineFactory(m_drive,
         DriveSysIdRoutineType.kTranslation);
@@ -126,7 +135,10 @@ public class Robot extends TimedRobot {
     return Map.of(
         "PrintHi", Commands.print("Hi!"),
         "PrintHello", Commands.print("Hello!"),
-        "PrintEnd", Commands.print("End!"));
+        "PrintEnd", Commands.print("End!"),
+        "Arm0", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(0)),
+        "Arm45", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)),
+        "Arm75", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
   }
 
   public boolean isBlueAlliance() {

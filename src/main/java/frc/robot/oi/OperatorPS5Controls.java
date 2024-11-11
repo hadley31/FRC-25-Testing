@@ -11,6 +11,21 @@ public class OperatorPS5Controls implements OperatorControls {
   }
 
   @Override
+  public Trigger stow() {
+    return m_controller.cross();
+  }
+
+  @Override
+  public Trigger scoreArm45Deg() {
+    return m_controller.circle();
+  }
+
+  @Override
+  public Trigger scoreArm75Deg() {
+    return m_controller.triangle();
+  }
+
+  @Override
   public Trigger quasistaticForward() {
     return m_controller.create().and(m_controller.povUp());
   }

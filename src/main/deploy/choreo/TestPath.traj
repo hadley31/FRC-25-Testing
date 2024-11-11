@@ -95,5 +95,8 @@
  "events":[
    {"name":"PrintHello", "from":{"target":3, "targetTimestamp":2.0308773158734383, "offset":{"exp":"0.5 s", "val":0.5}}, "event":null},
    {"name":"PrintHi", "from":{"target":2, "targetTimestamp":1.1366215245521611, "offset":{"exp":"0 s", "val":0.0}}, "event":{"type":"named", "data":{"name":"PrintHi"}}},
-   {"name":"PrintEnd", "from":{"target":4, "targetTimestamp":3.526647442680057, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
+   {"name":"PrintEnd", "from":{"target":4, "targetTimestamp":3.526647442680057, "offset":{"exp":"0 s", "val":0.0}}, "event":null},
+   {"name":"Arm45", "from":{"target":3, "targetTimestamp":2.0308773158734383, "offset":{"exp":"0 s", "val":0.0}}, "event":null},
+   {"name":"Arm0", "from":{"target":4, "targetTimestamp":3.526647442680057, "offset":{"exp":"0 s", "val":0.0}}, "event":null},
+   {"name":"Arm75", "from":{"target":1, "targetTimestamp":0.610157604021922, "offset":{"exp":"0 s", "val":0.0}}, "event":null}]
 }

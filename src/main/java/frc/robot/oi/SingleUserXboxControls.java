@@ -11,6 +11,8 @@ public class SingleUserXboxControls implements DriverControls, OperatorControls 
     m_controller = new CommandXboxController(port);
   }
 
+  // Driver Controls
+
   @Override
   public double driveForwardInput() {
     return MathUtil.applyDeadband(-m_controller.getLeftY(), 0.1);
@@ -48,17 +50,34 @@ public class SingleUserXboxControls implements DriverControls, OperatorControls 
 
   @Override
   public Trigger seedFieldRelative() {
+    return m_controller.back();
+  }
+
+  // Operator Controls
+
+  @Override
+  public Trigger stow() {
+    return m_controller.a();
+  }
+
+  @Override
+  public Trigger scoreArm45Deg() {
+    return m_controller.b();
+  }
+
+  @Override
+  public Trigger scoreArm75Deg() {
     return m_controller.y();
   }
 
   @Override
   public Trigger quasistaticForward() {
-    return m_controller.back().and(m_controller.povUp());
+    return m_controller.start().and(m_controller.povRight());
   }
 
   @Override
   public Trigger quasistaticReverse() {
-    return m_controller.back().and(m_controller.povDown());
+    return m_controller.start().and(m_controller.povLeft());
   }
 
   @Override

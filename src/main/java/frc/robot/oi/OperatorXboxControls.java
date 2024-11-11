@@ -11,6 +11,24 @@ public class OperatorXboxControls implements OperatorControls {
   }
 
   @Override
+  public Trigger stow() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Trigger scoreArm45Deg() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public Trigger scoreArm75Deg() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public Trigger quasistaticForward() {
     return m_controller.back().and(m_controller.povUp());
   }

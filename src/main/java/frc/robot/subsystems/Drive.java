@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -85,8 +85,9 @@ public class Drive extends SubsystemBase {
   }
 
   public void driveRobotPointAtTarget(LinearVelocity xVelocity, LinearVelocity yVelocity, Translation2d target) {
-    Rotation2d targetRotation = target.minus(getPose().getTranslation()).getAngle();
-    AngularVelocity feedForward = Radians.of(targetRotation.minus(getRotation()).getRadians()).per(Second);
+    Pose2d expectedPose = getPose().exp(getChassisSpeeds().toTwist2d(0.02));
+    Rotation2d targetRotation = target.minus(expectedPose.getTranslation()).getAngle();
+    AngularVelocity feedForward = Radians.of(targetRotation.minus(getRotation()).getRadians()).divide(Seconds.of(0.3));
 
     m_swerve.setControl(m_fieldRelativeFacingRequest
         .withVelocityX(xVelocity)
@@ -125,7 +126,6 @@ public class Drive extends SubsystemBase {
     return m_currentState.Speeds;
   }
 
-  @Logged
   public Rotation2d getRotation() {
     return getPose().getRotation();
   }
