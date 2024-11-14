@@ -89,4 +89,19 @@ public class SingleUserXboxControls implements DriverControls, OperatorControls 
   public Trigger dynamicReverse() {
     return m_controller.start().and(m_controller.povDown());
   }
+
+  @Override
+  public Trigger ampScoreRev() {
+    return new Trigger(() -> false);
+  }
+
+  @Override
+  public Trigger speakerRev() {
+    return new Trigger(() -> false);
+  }
+
+  @Override
+  public Trigger shoot() {
+    return new Trigger(() -> false);
+  }
 }

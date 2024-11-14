@@ -12,7 +12,6 @@ import choreo.auto.AutoFactory.AutoBindings;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Strategy;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -57,11 +56,14 @@ public class Robot extends TimedRobot {
   }
 
   private void configureSubsystems() {
-    m_drive = new Drive(TunerConstants.createDrivetrain());
-    m_arm = new Arm(17, 18);
+    m_drive = new Drive(TunerConstants.DriveTrain);
+    // m_arm = new Arm(17, 18);
   }
 
   private void configureBindings() {
+    System.out.println("Configuring button bindings.");
+    CommandScheduler.getInstance().getDefaultButtonLoop().clear();
+
     InputControlsFactory controlsFactory = InputControlsFactory.determineInputs();
     m_driverControls = controlsFactory.getDriverControls();
     m_operatorControls = controlsFactory.getOperatorControls();
@@ -78,9 +80,9 @@ public class Robot extends TimedRobot {
     m_driverControls.faceSpeakerDrive().whileTrue(pointAtSpeakerDriveCommand);
     m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
 
-    m_operatorControls.stow().onTrue(m_arm.setTargetAngleCommand(Rotation2d.kZero));
-    m_operatorControls.scoreArm45Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)));
-    m_operatorControls.scoreArm75Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
+    // m_operatorControls.stow().onTrue(m_arm.setTargetAngleCommand(Rotation2d.kZero));
+    // m_operatorControls.scoreArm45Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)));
+    // m_operatorControls.scoreArm75Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
 
     DriveSysIdRoutineFactory sysIdRoutineFactory = new DriveSysIdRoutineFactory(m_drive,
         DriveSysIdRoutineType.kTranslation);
@@ -88,6 +90,12 @@ public class Robot extends TimedRobot {
     m_operatorControls.quasistaticReverse().whileTrue(sysIdRoutineFactory.sysIdQuasistatic(Direction.kReverse));
     m_operatorControls.dynamicForward().whileTrue(sysIdRoutineFactory.sysIdDynamic(Direction.kForward));
     m_operatorControls.dynamicReverse().whileTrue(sysIdRoutineFactory.sysIdDynamic(Direction.kReverse));
+
+    m_operatorControls.ampScoreRev().whileTrue(Commands.print("REVING AT AMP SPEED"));
+    m_operatorControls.speakerRev().whileTrue(Commands.print("REVING AT SPEAKER SPEED"));
+
+    m_operatorControls.ampScoreRev().and(m_operatorControls.shoot()).whileTrue(Commands.print("SHOOT AMP"));
+    m_operatorControls.speakerRev().and(m_operatorControls.shoot()).whileTrue(Commands.print("SHOOT SPEAKER"));
   }
 
   private void configureAutos() {
@@ -131,18 +139,23 @@ public class Robot extends TimedRobot {
     }
   }
 
+  @Override
+  public void driverStationConnected() {
+    configureBindings();
+  }
+
   private Map<String, Command> getCommandBindings() {
     return Map.of(
         "PrintHi", Commands.print("Hi!"),
         "PrintHello", Commands.print("Hello!"),
-        "PrintEnd", Commands.print("End!"),
-        "Arm0", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(0)),
-        "Arm45", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)),
-        "Arm75", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
+        "PrintEnd", Commands.print("End!"));
+    // "Arm0", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(0)),
+    // "Arm45", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)),
+    // "Arm75", m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
   }
 
   public boolean isBlueAlliance() {
-    return DriverStation.getAlliance().orElse(null) == Alliance.Blue;
+    return DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Blue;
   }
 
   @Override

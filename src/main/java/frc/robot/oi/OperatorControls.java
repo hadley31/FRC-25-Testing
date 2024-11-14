@@ -16,4 +16,10 @@ public interface OperatorControls {
   public Trigger dynamicForward();
 
   public Trigger dynamicReverse();
+
+  public Trigger ampScoreRev();
+
+  public Trigger speakerRev();
+
+  public Trigger shoot();
 }

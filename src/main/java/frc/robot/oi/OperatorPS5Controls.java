@@ -44,4 +44,22 @@ public class OperatorPS5Controls implements OperatorControls {
   public Trigger dynamicReverse() {
     return m_controller.options().and(m_controller.povDown());
   }
+
+  @Override
+  public Trigger ampScoreRev() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'ampScoreRev'");
+  }
+
+  @Override
+  public Trigger speakerRev() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'speakerRev'");
+  }
+
+  @Override
+  public Trigger shoot() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'shoot'");
+  }
 }
