@@ -25,7 +25,6 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.oi.DriverControls;
 import frc.robot.oi.InputControlsFactory;
 import frc.robot.oi.OperatorControls;
-import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
 import frc.robot.util.DriveSysIdRoutineFactory;
@@ -35,8 +34,8 @@ import frc.robot.util.DriveSysIdRoutineFactory.DriveSysIdRoutineType;
 public class Robot extends TimedRobot {
   @Logged
   private Drive m_drive;
-  @Logged
-  private Arm m_arm;
+  // @Logged
+  // private Arm m_arm;
   private AutoChooser autoChooser;
   private Command m_autonomousCommand;
 
