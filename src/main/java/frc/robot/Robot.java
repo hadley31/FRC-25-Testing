@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import java.util.Map;
 
 import choreo.Choreo;
@@ -25,6 +27,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.oi.DriverControls;
 import frc.robot.oi.InputControlsFactory;
 import frc.robot.oi.OperatorControls;
+import frc.robot.subsystems.ArmTalonFXWithWPIControllers;
 import frc.robot.subsystems.Drive;
 import frc.robot.util.ChoreoPathController;
 import frc.robot.util.DriveSysIdRoutineFactory;
@@ -34,8 +37,8 @@ import frc.robot.util.DriveSysIdRoutineFactory.DriveSysIdRoutineType;
 public class Robot extends TimedRobot {
   @Logged
   private Drive m_drive;
-  // @Logged
-  // private Arm m_arm;
+  @Logged
+  private ArmTalonFXWithWPIControllers m_arm;
   private AutoChooser autoChooser;
   private Command m_autonomousCommand;
 
@@ -56,7 +59,7 @@ public class Robot extends TimedRobot {
 
   private void configureSubsystems() {
     m_drive = new Drive(TunerConstants.DriveTrain);
-    // m_arm = new Arm(17, 18);
+    m_arm = new ArmTalonFXWithWPIControllers(17, 18);
   }
 
   private void configureBindings() {
@@ -79,9 +82,9 @@ public class Robot extends TimedRobot {
     m_driverControls.faceSpeakerDrive().whileTrue(pointAtSpeakerDriveCommand);
     m_driverControls.seedFieldRelative().onTrue(seedFieldRelativeCommand);
 
-    // m_operatorControls.stow().onTrue(m_arm.setTargetAngleCommand(Rotation2d.kZero));
-    // m_operatorControls.scoreArm45Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(45)));
-    // m_operatorControls.scoreArm75Deg().onTrue(m_arm.setTargetAngleCommand(Rotation2d.fromDegrees(75)));
+    m_operatorControls.stow().onTrue(m_arm.setTargetAngleCommand(Degrees.zero()));
+    m_operatorControls.scoreArm45Deg().onTrue(m_arm.setTargetAngleCommand(Degrees.of(45)));
+    m_operatorControls.scoreArm75Deg().onTrue(m_arm.setTargetAngleCommand(Degrees.of(75)));
 
     DriveSysIdRoutineFactory sysIdRoutineFactory = new DriveSysIdRoutineFactory(m_drive,
         DriveSysIdRoutineType.kTranslation);
@@ -109,6 +112,7 @@ public class Robot extends TimedRobot {
     autoChooser = new AutoChooser(factory, "Choose Auto");
 
     autoChooser.addAutoRoutine("Test Auto", routines::testAuto);
+    autoChooser.addAutoRoutine("Basic Auto", routines::basicAuto);
   }
 
   @Override

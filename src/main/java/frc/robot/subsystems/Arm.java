@@ -175,6 +175,7 @@ public class Arm extends SubsystemBase {
     double maxAngleRad = Units.degreesToRadians(80);
     boolean simulateGravity = true;
     double moi = SingleJointedArmSim.estimateMOI(armLength, Kilograms.of(8).magnitude());
+
     m_sim = new SingleJointedArmSim(
         DCMotor.getFalcon500Foc(2),
         kGearing,
@@ -185,6 +186,7 @@ public class Arm extends SubsystemBase {
         simulateGravity,
         Units.degreesToRadians(0),
         0.0001, 0.0001);
+
     m_leaderSim = m_leader.getSimState();
     m_followerSim = m_follower.getSimState();
     m_remoteSensorSim = m_remoteSensor.getSimState();

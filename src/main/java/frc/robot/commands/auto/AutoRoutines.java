@@ -28,6 +28,20 @@ public class AutoRoutines {
     return routine.cmd();
   }
 
+  public Command basicAuto(AutoFactory factory) {
+    final AutoLoop routine = factory.newLoop("Basic Auto");
+    final AutoTrajectory testPath = factory.trajectory("BasicPath", routine);
+
+    routine.enabled().onTrue(
+        Commands.print("Starting Basic Auto")
+            .andThen(resetPoseCommand(routine, testPath))
+            .andThen(testPath.cmd())
+            .andThen(m_drive.stopCommand())
+            .andThen(Commands.print("Finished Basic Auto")));
+
+    return routine.cmd();
+  }
+
   private Command resetPoseCommand(AutoLoop loop, AutoTrajectory path) {
     return m_drive.runOnce(() -> path.getInitialPose().ifPresentOrElse(
         pose -> m_drive.resetPose(pose),
