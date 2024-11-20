@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
@@ -15,6 +16,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Strategy;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -24,6 +26,7 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -32,6 +35,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.util.GeometryUtil;
 
 @Logged(strategy = Strategy.OPT_IN)
 public class Drive extends SubsystemBase {
@@ -167,6 +171,19 @@ public class Drive extends SubsystemBase {
 
   public Command seedFieldRelativeCommand() {
     return Commands.runOnce(m_swerve::seedFieldCentric);
+  }
+
+  public Command setBrakeModeCommand(boolean enableBrake) {
+    NeutralModeValue value = enableBrake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
+    return Commands.runOnce(() -> m_swerve.configNeutralMode(value));
+  }
+
+  public Vector<N3> getUpVector() {
+    return GeometryUtil.rotateVector(GeometryUtil.kUp, getRotation3d().getQuaternion());
+  }
+
+  public boolean isLevel(double thresholdRadians) {
+    return Math.abs(m_swerve.getPigeon2().getPitch().getValueAsDouble()) < thresholdRadians;
   }
 
   private void startSimThread() {
