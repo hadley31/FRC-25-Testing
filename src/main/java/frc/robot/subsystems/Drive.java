@@ -91,7 +91,7 @@ public class Drive extends SubsystemBase {
   public void driveRobotPointAtTarget(LinearVelocity xVelocity, LinearVelocity yVelocity, Translation2d target) {
     Pose2d expectedPose = getPose().exp(getChassisSpeeds().toTwist2d(0.02));
     Rotation2d targetRotation = target.minus(expectedPose.getTranslation()).getAngle();
-    AngularVelocity feedForward = Radians.of(targetRotation.minus(getRotation()).getRadians()).divide(Seconds.of(0.3));
+    AngularVelocity feedForward = Radians.of(targetRotation.minus(getRotation()).getRadians()).div(Seconds.of(0.3));
 
     m_swerve.setControl(m_fieldRelativeFacingRequest
         .withVelocityX(xVelocity)
