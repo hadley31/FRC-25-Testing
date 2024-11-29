@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.auto.AutoRoutines;
+import frc.robot.commands.debug.DebugCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.oi.DriverControls;
 import frc.robot.oi.InputControlsFactory;
@@ -113,6 +114,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void disabledInit() {
+    DebugCommands.brakeAndReset(m_drive).schedule();
   }
 
   @Override
